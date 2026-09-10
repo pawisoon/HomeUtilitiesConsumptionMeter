@@ -39,6 +39,10 @@
 
 * { box-sizing: border-box; }
 
+/* Elements hidden through the hidden attribute must stay hidden. Any display
+   rule of our own would otherwise outrank the browser's [hidden] default. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   padding: 0 16px 48px;
