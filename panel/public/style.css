@@ -1,0 +1,255 @@
+/* Home Utilities Consumption Meter — warm paper, deep ink.
+   Built for phones first and for readers who want big type: 18px base,
+   56px touch targets, no thin grey-on-grey text. */
+
+:root {
+  --paper: #f4f0e8;
+  --card: #fbf9f4;
+  --ink: #12303a;
+  --muted: #5d7178;
+  --water: #0e7c86;
+  --water-deep: #0b5560;
+  --water-soft: #cfe6e8;
+  --sand: #c9975c;
+  --estimate: #b9cfd3;
+  --line: #ded7c8;
+  --up: #a4331f;
+  --down: #16714b;
+  --radius: 18px;
+  --shadow: 0 1px 2px rgba(18, 48, 58, .05), 0 8px 24px -18px rgba(18, 48, 58, .35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0c1a20;
+    --card: #10242c;
+    --ink: #e8eef0;
+    --muted: #94a9af;
+    --water: #3fb8c4;
+    --water-deep: #7fd6de;
+    --water-soft: #1d434c;
+    --sand: #e0a869;
+    --estimate: #3b5a62;
+    --line: #21383f;
+    --up: #ff9b86;
+    --down: #6fd6a8;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px -20px rgba(0, 0, 0, .8);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 16px 48px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 18px/1.55 Manrope, ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* A single soft wash of water at the top of the page, nothing more. */
+.wash {
+  position: fixed; inset: 0 0 auto; height: 380px; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(90% 100% at 20% -20%, color-mix(in oklab, var(--water) 18%, transparent), transparent 62%),
+    radial-gradient(70% 80% at 95% -10%, color-mix(in oklab, var(--sand) 14%, transparent), transparent 60%);
+}
+
+main, header, footer { max-width: 720px; margin: 0 auto; }
+
+/* ---------- header ---------- */
+.top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; padding: 28px 0 20px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.drop { width: 30px; height: 30px; color: var(--water); flex: none; }
+.brand-emoji { font-size: 1.6rem; line-height: 1; }
+h1 {
+  margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600;
+  font-variation-settings: "opsz" 96; font-size: 2rem; letter-spacing: -.02em;
+}
+.top-right { text-align: right; }
+.reading { margin: 0 0 6px; color: var(--muted); font-size: .95rem; }
+.ghost {
+  min-height: 40px; padding: 0 14px; font: 600 .95rem Manrope, sans-serif;
+  color: var(--muted); background: none; border: 1.5px solid var(--line);
+  border-radius: 999px; cursor: pointer; transition: color .15s, border-color .15s;
+}
+.ghost:hover { color: var(--water); border-color: var(--water); }
+
+/* ---------- utility switcher ---------- */
+.utils {
+  display: flex; gap: 10px; overflow-x: auto; max-width: 720px;
+  margin: 0 auto 10px; padding: 2px;
+}
+.util {
+  flex: none; min-height: 48px; padding: 0 18px; font: 600 1.05rem Manrope, sans-serif;
+  color: var(--ink); background: var(--card); border: 2px solid var(--line);
+  border-radius: 999px; cursor: pointer; white-space: nowrap;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.util:hover { border-color: var(--water); }
+.util.is-on { background: var(--water); border-color: var(--water); color: #fff; }
+.util:focus-visible { outline: 3px solid var(--water-deep); outline-offset: 2px; }
+
+/* ---------- hero ---------- */
+.hero { padding: 12px 0 34px; }
+.eyebrow {
+  margin: 0 0 2px; font-size: 1rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted);
+}
+.bignum {
+  margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600;
+  font-variation-settings: "opsz" 144;
+  font-size: clamp(4.2rem, 22vw, 7rem); line-height: .92; letter-spacing: -.04em;
+  color: var(--water-deep);
+  font-variant-numeric: tabular-nums;
+}
+/* Spelled out ("litrów"), so it needs to sit quietly beside the number
+   instead of being mistaken for a stray stroke, as a lone "l" was. */
+.bignum .unit {
+  font-size: .2em; margin-left: .16em; letter-spacing: 0; color: var(--muted);
+  font-family: Manrope, sans-serif; font-weight: 600;
+}
+.hero-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 14px 0 0; }
+.pill {
+  display: inline-block; padding: 7px 14px; border-radius: 999px;
+  background: var(--water-soft); color: var(--water-deep);
+  font-weight: 700; font-size: 1rem;
+}
+.delta { font-weight: 600; font-size: 1rem; }
+.delta.up { color: var(--up); }
+.delta.down { color: var(--down); }
+.hero-note { margin: 10px 0 0; color: var(--muted); font-size: .95rem; }
+.hero-today {
+  margin: 14px 0 0; padding: 12px 16px; border-left: 3px solid var(--water);
+  background: color-mix(in oklab, var(--water) 8%, transparent); border-radius: 0 12px 12px 0;
+  font-size: 1.05rem;
+}
+.hero-today strong { font-variant-numeric: tabular-nums; }
+
+/* ---------- cards ---------- */
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.card h2 {
+  margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600;
+  font-variation-settings: "opsz" 40; font-size: 1.25rem; letter-spacing: -.01em;
+}
+.card-sub { margin: 2px 0 16px; color: var(--muted); font-size: .95rem; }
+
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+.grid .card { margin: 0; }
+.stat .num {
+  margin: 12px 0 4px; font-family: Fraunces, Georgia, serif; font-weight: 600;
+  font-variation-settings: "opsz" 72; font-size: 2rem; line-height: 1;
+  letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+}
+.stat .cmp { margin: 0; color: var(--muted); font-size: .95rem; }
+.stat .cmp.up { color: var(--up); font-weight: 600; }
+.stat .cmp.down { color: var(--down); font-weight: 600; }
+
+/* ---------- occupancy ---------- */
+.persons { display: flex; flex-wrap: wrap; gap: 10px; }
+.person-btn {
+  width: 56px; height: 56px; font: 700 1.25rem Manrope, sans-serif;
+  color: var(--ink); background: var(--paper);
+  border: 2px solid var(--line); border-radius: 16px; cursor: pointer;
+  transition: transform .12s ease, background .15s, border-color .15s, color .15s;
+  font-variant-numeric: tabular-nums;
+}
+.person-btn:hover { border-color: var(--water); }
+.person-btn:active { transform: scale(.94); }
+.person-btn.is-on { background: var(--water); border-color: var(--water); color: #fff; }
+.person-btn:focus-visible { outline: 3px solid var(--water-deep); outline-offset: 2px; }
+
+.link {
+  margin-top: 18px; padding: 0; font: 600 1rem Manrope, sans-serif;
+  color: var(--water); background: none; border: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 4px;
+}
+.history { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 8px; }
+.hrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+}
+.hrow:last-child { border-bottom: 0; }
+.hrow .day { font-weight: 600; }
+.hrow .day small { display: block; font-weight: 400; color: var(--muted); font-size: .85rem; }
+.hrow select {
+  min-height: 48px; min-width: 92px; padding: 0 12px; font: 600 1rem Manrope, sans-serif;
+  color: var(--ink); background: var(--paper); border: 2px solid var(--line);
+  border-radius: 12px;
+}
+
+/* ---------- charts ---------- */
+.chart-card { padding-bottom: 16px; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; margin: -4px -4px 18px; padding: 4px; }
+.tab {
+  flex: none; min-height: 44px; padding: 0 16px; font: 600 1rem Manrope, sans-serif;
+  color: var(--muted); background: none; border: 1.5px solid var(--line);
+  border-radius: 999px; cursor: pointer; white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.tab:hover { color: var(--water); }
+.tab.is-on { color: #fff; background: var(--water); border-color: var(--water); }
+.chart-wrap { position: relative; height: 300px; }
+
+/* day picker */
+.daypick { display: grid; grid-template-columns: 52px 1fr 52px; gap: 10px; align-items: center; margin: 0 0 14px; }
+.daybtn {
+  height: 52px; font: 700 1.6rem Manrope, sans-serif; color: var(--water);
+  background: var(--paper); border: 2px solid var(--line); border-radius: 14px; cursor: pointer;
+}
+.daybtn:hover { border-color: var(--water); }
+.dayinput {
+  height: 52px; padding: 0 14px; font: 600 1.05rem Manrope, sans-serif; color: var(--ink);
+  background: var(--paper); border: 2px solid var(--line); border-radius: 14px; min-width: 0;
+  color-scheme: light dark;
+}
+.dayinput:focus { outline: none; border-color: var(--water); }
+.daysum { grid-column: 1 / -1; margin: 4px 0 0; color: var(--muted); font-size: .95rem; }
+.daysum strong { color: var(--ink); }
+.legend {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+  margin: 16px 0 0; color: var(--muted); font-size: .9rem;
+}
+.key { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.key-normal { background: #0e7c86; }
+.key-holiday { background: #c9975c; }
+.key-weekend { background: #7fb3ba; }
+.key-estimate { background: var(--estimate); }
+
+/* ---------- holidays ---------- */
+.holidays { margin-top: 14px; }
+.hol {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+}
+.hol:last-child { border-bottom: 0; }
+.hol .name { font-weight: 600; }
+.hol .name small { display: block; font-weight: 400; color: var(--muted); font-size: .85rem; }
+.hol .val { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--water-deep); white-space: nowrap; }
+.empty { color: var(--muted); margin: 0; }
+
+footer { padding-top: 8px; text-align: center; }
+footer p { margin: 0; color: var(--muted); font-size: .85rem; }
+
+/* ---------- motion ---------- */
+.reveal { animation: rise .6s cubic-bezier(.2, .7, .3, 1) both; animation-delay: var(--d, 0ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 460px) {
+  .grid { grid-template-columns: 1fr; }
+  .card { padding: 20px 18px; }
+  .top { padding-top: 20px; }
+  h1 { font-size: 1.75rem; }
+}

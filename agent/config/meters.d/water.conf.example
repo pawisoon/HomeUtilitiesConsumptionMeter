@@ -1,0 +1,22 @@
+# /etc/home-utilities/meters.d/water.conf
+# One file per meter; the file name is the utility id (water, electricity, gas).
+
+# Shown at the top of the Telegram summary.
+METER_LABEL="💧 Wodomierz"
+
+# wmbusmeters driver and the meter's wireless M-Bus address. Find both by
+# listening once:  wmbusmeters --listento=t1,c1,s1 rtlwmbus
+DRIVER=izarv2
+METER_ID=12345678
+
+# AES-128 key from the utility, or NOKEY when frames are not encrypted.
+METER_KEY=NOKEY
+
+# Radio link modes to listen on, and how long to wait for a frame.
+LINK_MODES=t1,c1,s1
+READ_TIMEOUT=120
+
+# Units, used only for the Telegram wording.
+UNIT="m³"
+FINE_UNIT="l"
+FINE_FACTOR=1000

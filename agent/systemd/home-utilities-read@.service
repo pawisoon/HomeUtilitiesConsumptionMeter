@@ -1,0 +1,9 @@
+[Unit]
+Description=Read the %i meter
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/home-utilities/bin/read-meter.sh %i
+# The radio and the shared services both need root.
+User=root

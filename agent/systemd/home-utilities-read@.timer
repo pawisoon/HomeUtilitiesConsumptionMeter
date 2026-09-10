@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly reading of the %i meter
+
+[Timer]
+# A few minutes past the hour, so a reading belongs to the hour that just ended.
+OnCalendar=*-*-* *:03:00 UTC
+Persistent=true
+RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target

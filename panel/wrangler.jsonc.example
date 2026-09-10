@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  // Rename this file to wrangler.jsonc and fill in the two values marked below.
+  "name": "utilities",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-25",
+
+  // Reachable at <name>.<your-subdomain>.workers.dev. Preview URLs stay off so
+  // the panel has exactly one address.
+  "workers_dev": true,
+  "preview_urls": false,
+
+  // run_worker_first puts the password gate in front of every asset, so nothing
+  // is readable before logging in.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "utilities-db",
+      "database_id": "PASTE_THE_ID_FROM_wrangler_d1_create"
+    }
+  ],
+
+  "vars": {
+    // Which utilities the dashboard shows, in order: water, electricity, gas.
+    "UTILITIES": "water",
+    // Days and hours are cut on this calendar.
+    "TIME_ZONE": "Europe/Warsaw",
+    // Household size assumed for days nobody filled in.
+    "DEFAULT_PERSONS": "2"
+  },
+
+  // Rebuilds recent days once a day, in case a reading arrived late.
+  "triggers": { "crons": ["0 7 * * *"] },
+
+  "observability": { "enabled": true }
+}

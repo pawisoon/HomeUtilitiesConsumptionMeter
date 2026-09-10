@@ -1,0 +1,16 @@
+# /etc/home-utilities/meters.d/electricity.conf
+# Needs the HAN interface switched on by your distribution operator, plus the
+# AES key they issue. See docs/electricity.md.
+
+METER_LABEL="⚡ Licznik energii"
+
+DRIVER=auto
+METER_ID=12345678
+METER_KEY=PUT_THE_AES128_KEY_HERE
+
+LINK_MODES=t1,c1
+READ_TIMEOUT=120
+
+UNIT="kWh"
+FINE_UNIT="kWh"
+FINE_FACTOR=1

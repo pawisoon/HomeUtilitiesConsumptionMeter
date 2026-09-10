@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily utility summary on Telegram
+
+[Timer]
+OnCalendar=*-*-* 06:00:00 UTC
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=Daily utility summary on Telegram
+
+[Service]
+Type=oneshot
+ExecStart=/opt/home-utilities/bin/report-daily.sh
+User=root

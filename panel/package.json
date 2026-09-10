@@ -1,0 +1,20 @@
+{
+  "name": "home-utilities-panel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Worker dashboard for household utility meter readings",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8799",
+    "deploy": "node scripts/stamp.mjs && wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "schema:local": "wrangler d1 execute $npm_config_db --local --file=schema.sql",
+    "schema:remote": "wrangler d1 execute $npm_config_db --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260908.1",
+    "typescript": "^5.7.0",
+    "wrangler": "^4.0.0"
+  }
+}
