@@ -20,7 +20,8 @@ project reads the counter every hour and does the subtraction, so you get:
   ours swings between two and six people depending on who is visiting
 - Polish public holidays marked on the charts, including the Easter-based ones,
   and a card comparing holidays and weekends against working days
-- one Telegram message a morning with the last 24 hours
+- one Telegram message a morning with the last 24 hours, and an alert the hour
+  a reading fails because the dongle vanished or the meter went quiet
 
 Everything sits behind one shared password. There are no accounts to manage,
 which matters when the people using it are my family.

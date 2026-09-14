@@ -34,6 +34,15 @@ feeds an ADS-B receiver, put the service name in `SDR_SHARED_SERVICES` and the
 reader will stop it, take its reading, and start it again. That costs the feed
 about ten seconds per hour. A second dongle avoids the interruption entirely.
 
+RTL2832U sticks sometimes hang after long hours on air and drop off the USB
+bus. The kernel log shows `device descriptor read/64, error -110` followed by
+`unable to enumerate USB device`, and only unplugging the stick brings it back.
+The reader checks for the dongle before every read and sends a Telegram alert
+on the first failure, then a second message once readings resume. Heat is the
+usual cause, so an extension cable that moves the stick away from the computer,
+a stick-on heatsink, or a metal-cased dongle like the RTL-SDR Blog v3 or v4 all
+make it rarer.
+
 ## Radio: gas
 
 Most domestic gas meters have no radio at all, and the ones that do are usually
