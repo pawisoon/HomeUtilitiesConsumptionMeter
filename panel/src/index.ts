@@ -18,6 +18,7 @@ import {
 import { addDays, localDate, today } from "./dates";
 import { buildSummary, hoursBetween, recompute, series, settingsFrom } from "./stats";
 import { type UtilityId, enabledUtilities, isUtilityId } from "./utilities";
+import { MESSAGES, langOf } from "./messages";
 import { loginPage } from "./login";
 
 function json(data: unknown, status = 200): Response {
@@ -124,8 +125,9 @@ async function handleIngest(request: Request, env: Env): Promise<Response> {
 
 async function handleLogin(request: Request, env: Env): Promise<Response> {
   const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
+  const m = MESSAGES[langOf(env.LANGUAGE)];
   if ((await recentFailures(env, ip)) >= MAX_ATTEMPTS) {
-    return json({ error: "Za dużo prób. Spróbuj ponownie za 15 minut." }, 429);
+    return json({ error: m.tooMany }, 429);
   }
 
   let password = "";
@@ -133,13 +135,13 @@ async function handleLogin(request: Request, env: Env): Promise<Response> {
     const body = (await request.json()) as { password?: string };
     password = body.password ?? "";
   } catch {
-    return json({ error: "Nieprawidłowe dane." }, 400);
+    return json({ error: m.badRequest }, 400);
   }
 
   if (!(await verifyPassword(password, env.PASSWORD_HASH))) {
     await recordFailure(env, ip);
     await sleep(1000); // blunt the pace of guessing
-    return json({ error: "Nieprawidłowe hasło." }, 401);
+    return json({ error: m.badPassword }, 401);
   }
 
   await clearFailures(env, ip);
@@ -162,7 +164,11 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   const utility = utilityParam(url, env);
 
   if (path === "/api/config") {
-    return json({ utilities: enabledUtilities(env.UTILITIES), time_zone: settings.zone });
+    return json({
+      utilities: enabledUtilities(env.UTILITIES),
+      time_zone: settings.zone,
+      language: langOf(env.LANGUAGE),
+    });
   }
 
   if (path === "/api/summary") return json(await buildSummary(env, utility, settings));
@@ -251,7 +257,7 @@ export default {
 
     // The dashboard itself is private, assets included.
     if (!(await isLoggedIn(request, env))) {
-      return new Response(loginPage(), {
+      return new Response(loginPage(langOf(env.LANGUAGE)), {
         status: 200,
         headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
       });

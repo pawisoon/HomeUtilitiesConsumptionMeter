@@ -1,9 +1,15 @@
 /// The login screen comes from the Worker rather than public/, so nothing at
 /// all is readable before a session exists.
 
-export function loginPage(): string {
+import { MESSAGES, type Lang } from "./messages";
+
+export function loginPage(lang: Lang = "pl"): string {
+  const m = MESSAGES[lang];
+  // Both dictionaries travel with the page, so a visitor who picked the other
+  // language on the dashboard sees the login screen in it too, before paint.
+  const both = JSON.stringify({ pl: MESSAGES.pl, en: MESSAGES.en });
   return `<!doctype html>
-<html lang="pl">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,7 +18,7 @@ export function loginPage(): string {
   // Match whatever theme the dashboard was left on, defaulting to light.
   try { if (localStorage.getItem("theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch {}
 </script>
-<title>Liczniki — logowanie</title>
+<title>${m.loginTitle}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
@@ -73,21 +79,32 @@ export function loginPage(): string {
       <rect x="3.2" y="4.2" width="17.6" height="15.6" rx="3"/>
       <path d="M7.4 15.4V11m4.6 4.4V8.6m4.6 6.8v-2.6"/>
     </svg>
-    <h1>Liczniki</h1>
-    <p class="sub">Zużycie mediów w domu</p>
+    <h1 id="brand">${m.brand}</h1>
+    <p class="sub" id="tagline">${m.tagline}</p>
     <form id="f" autocomplete="on">
-      <label for="p">Hasło rodzinne</label>
+      <label for="p" id="plabel">${m.password}</label>
       <input id="p" name="password" type="password" autocomplete="current-password" autofocus required>
-      <button id="b" type="submit">Zaloguj</button>
+      <button id="b" type="submit">${m.signIn}</button>
       <div class="err" id="e" role="alert"></div>
     </form>
   </main>
 <script>
+  const M = ${both};
+  let L = ${JSON.stringify(lang)};
+  try { const saved = localStorage.getItem("lang"); if (saved && M[saved]) L = saved; } catch {}
+  const S = M[L];
+  document.documentElement.lang = L;
+  document.title = S.loginTitle;
+  document.getElementById('brand').textContent = S.brand;
+  document.getElementById('tagline').textContent = S.tagline;
+  document.getElementById('plabel').textContent = S.password;
+
   const f = document.getElementById('f'), p = document.getElementById('p'),
         b = document.getElementById('b'), e = document.getElementById('e');
+  b.textContent = S.signIn;
   f.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    e.textContent = ''; b.disabled = true; b.textContent = 'Sprawdzam…';
+    e.textContent = ''; b.disabled = true; b.textContent = S.signingIn;
     try {
       const r = await fetch('/api/login', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -95,9 +112,9 @@ export function loginPage(): string {
       });
       if (r.status === 204) { location.replace('/'); return; }
       const d = await r.json().catch(() => ({}));
-      e.textContent = d.error || 'Nie udało się zalogować.';
-    } catch { e.textContent = 'Brak połączenia z internetem.'; }
-    b.disabled = false; b.textContent = 'Zaloguj'; p.select();
+      e.textContent = d.error || S.signInFailed;
+    } catch { e.textContent = S.offline; }
+    b.disabled = false; b.textContent = S.signIn; p.select();
   });
 </script>
 </body>

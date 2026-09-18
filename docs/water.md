@@ -4,6 +4,11 @@ Water is the easy one. Many modern water meters carry a radio module that
 broadcasts the counter in clear text every few seconds, and nobody has to grant
 you permission to listen to your own meter.
 
+In Poland the wodociągi have been fitting Diehl IZAR modules for years, because
+they read the meters from a van driving past rather than by knocking on doors.
+That same broadcast is what this reads. You do not need a key, a form or a
+contract, and nothing about the meter changes.
+
 ## Finding the meter
 
 Free the dongle if something else is using it, then listen:

@@ -48,8 +48,9 @@ downloadable from their site, and it asks for:
 - the meter number from the faceplate
 - your name, PESEL, email and mobile number, because the key is sent to those
 
-Hand it in at a customer service point for your region. There is no fee. Other
-operators have equivalent forms.
+Hand it in at a customer service point for your region. There is no fee. Tauron,
+Enea, Energa and Stoen have equivalent forms under the same regulation, so the
+route is the same wherever you live, only the paperwork is named differently.
 
 Reports of how long this takes vary from the same day to four months. One
 account describes technicians handing over a key that turned out not to work,

@@ -78,8 +78,13 @@ h1 {
   margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600;
   font-variation-settings: "opsz" 96; font-size: 2rem; letter-spacing: -.02em;
 }
-.top-right { text-align: right; }
-.reading { margin: 0 0 6px; color: var(--muted); font-size: .95rem; }
+.top-right { text-align: right; min-width: 0; }
+.reading {
+  margin: 0 0 6px; color: var(--muted); font-size: .95rem;
+  /* Long localised timestamps wrap rather than pushing the buttons off-screen. */
+  overflow-wrap: anywhere;
+}
+.controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .ghost {
   min-height: 40px; padding: 0 14px; font: 600 .95rem Manrope, sans-serif;
   color: var(--muted); background: none; border: 1.5px solid var(--line);
@@ -87,7 +92,7 @@ h1 {
 }
 .ghost:hover { color: var(--water); border-color: var(--water); }
 .theme {
-  width: 40px; height: 40px; margin-left: 8px; font-size: 1.1rem; line-height: 1;
+  width: 40px; height: 40px; font-size: 1.05rem; line-height: 1;
   color: var(--muted); background: none; border: 1.5px solid var(--line);
   border-radius: 999px; cursor: pointer; vertical-align: middle;
   transition: color .15s, border-color .15s;

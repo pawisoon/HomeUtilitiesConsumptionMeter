@@ -1,14 +1,49 @@
 /* Home Utilities Consumption Meter — dashboard.
    Plain browser JavaScript, no build step: the Worker serves this file as is. */
 
-const DAY_LONG = new Intl.DateTimeFormat("pl-PL", { weekday: "long", day: "numeric", month: "long" });
-const DAY_SHORT = new Intl.DateTimeFormat("pl-PL", { day: "numeric", month: "short" });
-const WEEKDAY = new Intl.DateTimeFormat("pl-PL", { weekday: "short" });
-const MONTH_LONG = new Intl.DateTimeFormat("pl-PL", { month: "long", year: "numeric" });
+/* ---------------- language ---------------- */
+
+let lang = "pl";
+let S = window.I18N.strings.pl;
+let plural = window.I18N.plurals.pl;
+let DAY_LONG, DAY_SHORT, WEEKDAY, MONTH_LONG;
+
+/** A string from the dictionary with {placeholders} filled in. */
+function t(key, vars) {
+  let text = S[key] ?? key;
+  if (vars) for (const [name, value] of Object.entries(vars)) text = text.split(`{${name}}`).join(value);
+  return text;
+}
+
+function setLanguage(code) {
+  lang = window.I18N.languages.includes(code) ? code : "pl";
+  S = window.I18N.strings[lang];
+  plural = window.I18N.plurals[lang];
+  const l = S.locale;
+  DAY_LONG = new Intl.DateTimeFormat(l, { weekday: "long", day: "numeric", month: "long" });
+  DAY_SHORT = new Intl.DateTimeFormat(l, { day: "numeric", month: "short" });
+  WEEKDAY = new Intl.DateTimeFormat(l, { weekday: "short" });
+  MONTH_LONG = new Intl.DateTimeFormat(l, { month: "long", year: "numeric" });
+  document.documentElement.lang = lang;
+  try {
+    localStorage.setItem("lang", lang);
+  } catch {
+    // Storage refused; the choice lasts for this visit only.
+  }
+}
+
+/** Fills every element carrying data-i18n, and its aria-label twin. */
+function translatePage() {
+  document.title = S.docTitle;
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+  for (const el of document.querySelectorAll("[data-i18n-aria]")) {
+    el.setAttribute("aria-label", t(el.dataset.i18nAria));
+  }
+}
 
 /* ---------------- state ---------------- */
 
-let config = { utilities: [], time_zone: "Europe/Warsaw" };
+let config = { utilities: [], time_zone: "Europe/Warsaw", language: "pl" };
 let utility = null;          // spec of the utility on screen
 let chart = null;
 let currentView = "day";
@@ -16,7 +51,7 @@ let currentDay = null;
 let occupancyCache = [];
 
 const num = (value, decimals = 0) =>
-  new Intl.NumberFormat("pl-PL", {
+  new Intl.NumberFormat(S.locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(value);
@@ -26,19 +61,9 @@ const num = (value, decimals = 0) =>
 /** Base-unit value as a day-scale number, e.g. 0.223 m³ → 223. */
 const fine = (base) => base * utility.finePerBase;
 
-/** 1 litr, 2-4 litry, 5+ litrów, with the 12-14 exception. */
-function polishLitre(n) {
-  const abs = Math.abs(n);
-  if (abs === 1) return "litr";
-  const last = abs % 10;
-  const lastTwo = abs % 100;
-  if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return "litry";
-  return "litrów";
-}
-
-/** The fine unit, declined when the utility says it declines. */
+/** The fine unit, declined in languages that decline it. */
 function fineUnitFor(amount) {
-  if (utility.plural === "pl-litre") return polishLitre(Math.round(amount));
+  if (utility.plural === "pl-litre") return plural.litre(Math.round(amount));
   return utility.fineUnit;
 }
 
@@ -57,11 +82,7 @@ function fmtBase(base) {
   return `${num(base, decimals)} ${utility.baseUnit}`;
 }
 
-function personWord(n) {
-  if (n === 1) return "osoba";
-  if (n >= 2 && n <= 4) return "osoby";
-  return "osób";
-}
+const personWord = (n) => plural.person(n);
 
 /* ---------------- dates ---------------- */
 
@@ -80,7 +101,7 @@ function localDay(ts) {
 }
 
 function localTime(ts) {
-  return new Intl.DateTimeFormat("pl-PL", {
+  return new Intl.DateTimeFormat(S.locale, {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: config.time_zone,
@@ -89,9 +110,9 @@ function localTime(ts) {
 
 function relativeDayLabel(iso) {
   const diff = Math.round((asDate(todayISO()) - asDate(iso)) / 86400000);
-  if (diff === 0) return "Dzisiaj";
-  if (diff === 1) return "Wczoraj";
-  if (diff === 2) return "Przedwczoraj";
+  if (diff === 0) return S.today;
+  if (diff === 1) return S.yesterday;
+  if (diff === 2) return S.dayBefore;
   return DAY_LONG.format(asDate(iso)).replace(/^./, (c) => c.toUpperCase());
 }
 
@@ -123,9 +144,8 @@ function renderHero(s) {
     unit.textContent = "";
     pill.hidden = true;
     document.getElementById("heroDelta").textContent = "";
-    document.getElementById("heroLabel").textContent = "Brak danych";
-    document.getElementById("heroNote").textContent =
-      "Pierwsze zużycie pojawi się, gdy licznik zostanie odczytany w dwóch kolejnych dniach.";
+    document.getElementById("heroLabel").textContent = S.noData;
+    document.getElementById("heroNote").textContent = S.firstReading;
     renderToday(s);
     return;
   }
@@ -137,17 +157,25 @@ function renderHero(s) {
   unit.textContent = fineUnitFor(amount);
 
   pill.hidden = false;
-  pill.textContent =
-    `${fmtFine(day.per_person, { word: false })} na osobę · ${day.persons} ${personWord(day.persons)}`;
+  pill.textContent = t("heroPill", {
+    amount: fmtFine(day.per_person, { word: false }),
+    n: day.persons,
+    people: personWord(day.persons),
+  });
 
   const delta = document.getElementById("heroDelta");
   if (s.previous_day && s.previous_day.usage > 0) {
     const change = Math.round(((day.usage - s.previous_day.usage) / s.previous_day.usage) * 100);
     if (Math.abs(change) < 1) {
-      delta.textContent = "tyle samo co dzień wcześniej";
+      delta.textContent = t("cmpSame", { phrase: S.phraseYesterday });
       delta.className = "delta";
     } else {
-      delta.textContent = `${change > 0 ? "▲" : "▼"} o ${Math.abs(change)}% ${change > 0 ? "więcej" : "mniej"} niż dzień wcześniej`;
+      delta.textContent = t("cmpPattern", {
+        arrow: change > 0 ? "▲" : "▼",
+        pct: Math.abs(change),
+        dir: change > 0 ? S.more : S.less,
+        phrase: S.phraseYesterday,
+      });
       delta.className = `delta ${change > 0 ? "up" : "down"}`;
     }
   } else {
@@ -156,8 +184,8 @@ function renderHero(s) {
 
   const notes = [];
   if (day.holiday_name) notes.push(day.holiday_name);
-  else if (day.is_weekend) notes.push("weekend");
-  if (day.estimated) notes.push("wartość szacowana — brakowało odczytu");
+  else if (day.is_weekend) notes.push(S.weekend);
+  if (day.estimated) notes.push(S.estimatedDay);
   document.getElementById("heroNote").textContent = notes.join(" · ");
 
   renderToday(s);
@@ -165,12 +193,15 @@ function renderHero(s) {
 
 function renderToday(s) {
   const el = document.getElementById("heroToday");
-  const t = s.today_so_far;
-  if (!t || t.readings < 2) {
+  const today = s.today_so_far;
+  if (!today || today.readings < 2) {
     el.hidden = true;
     return;
   }
-  el.innerHTML = `Dzisiaj od ${localTime(t.since_ts)}: <strong>${fmtFine(t.usage)}</strong>`;
+  el.innerHTML = t("todaySince", {
+    time: localTime(today.since_ts),
+    amount: `<strong>${fmtFine(today.usage)}</strong>`,
+  });
   el.hidden = false;
 }
 
@@ -193,31 +224,36 @@ function countUp(el, target) {
 /* ---------------- stat cards ---------------- */
 
 function compare(now, before, phrase) {
-  if (!before || before <= 0) return { text: "brak porównania", cls: "" };
+  if (!before || before <= 0) return { text: S.noComparison, cls: "" };
   const change = Math.round(((now - before) / before) * 100);
-  if (Math.abs(change) < 1) return { text: `tyle samo co ${phrase}`, cls: "" };
+  if (Math.abs(change) < 1) return { text: t("cmpSame", { phrase }), cls: "" };
   return {
-    text: `${change > 0 ? "▲" : "▼"} o ${Math.abs(change)}% ${change > 0 ? "więcej" : "mniej"} niż ${phrase}`,
+    text: t("cmpPattern", {
+      arrow: change > 0 ? "▲" : "▼",
+      pct: Math.abs(change),
+      dir: change > 0 ? S.more : S.less,
+      phrase,
+    }),
     cls: change > 0 ? "up" : "down",
   };
 }
 
 function renderStats(s) {
   document.getElementById("weekNow").textContent = fmtFine(s.week.usage);
-  const w = compare(s.week.usage, s.prev_week.usage, "w tym samym czasie tydzień temu");
+  const w = compare(s.week.usage, s.prev_week.usage, S.phraseWeek);
   const weekCmp = document.getElementById("weekCmp");
   weekCmp.textContent = w.text;
   weekCmp.className = `cmp ${w.cls}`;
 
   document.getElementById("monthNow").textContent = fmtBase(s.month.usage);
-  const m = compare(s.month.usage, s.prev_month.usage, "miesiąc temu o tej porze");
+  const m = compare(s.month.usage, s.prev_month.usage, S.phraseMonth);
   const monthCmp = document.getElementById("monthCmp");
   monthCmp.textContent = m.text;
   monthCmp.className = `cmp ${m.cls}`;
 
   const perPerson = s.persons_today > 0 ? s.avg30 / s.persons_today : 0;
   document.getElementById("avgPerson").textContent = fmtFine(perPerson);
-  document.getElementById("avgPersonSub").textContent = "dziennie na osobę · ostatnie 30 dni";
+  document.getElementById("avgPersonSub").textContent = S.dailyPerPerson;
 
   const special = s.special.per_person;
   const ordinary = s.ordinary.per_person;
@@ -227,23 +263,30 @@ function renderStats(s) {
     const diff = Math.round(((special - ordinary) / ordinary) * 100);
     specialCmp.textContent =
       Math.abs(diff) < 1
-        ? "na osobę — tyle samo co w dni robocze"
-        : `na osobę — ${Math.abs(diff)}% ${diff > 0 ? "więcej" : "mniej"} niż w dni robocze`;
+        ? S.sameAsWorkdays
+        : t("vsWorkdays", { pct: Math.abs(diff), dir: diff > 0 ? S.more : S.less });
     specialCmp.className = `cmp ${diff > 0 ? "up" : "down"}`;
   } else {
-    specialCmp.textContent = "na osobę";
+    specialCmp.textContent = S.perPersonOnly;
     specialCmp.className = "cmp";
   }
 
   const r = s.last_reading;
   document.getElementById("lastReading").textContent = r.ts
-    ? `odczyt: ${relativeDayLabel(localDay(r.ts)).toLowerCase()}, ${localTime(r.ts)}`
-    : "brak odczytu";
+    ? t("lastReading", {
+        day: S.lowercaseRelative
+          ? relativeDayLabel(localDay(r.ts)).toLowerCase()
+          : relativeDayLabel(localDay(r.ts)),
+        time: localTime(r.ts),
+      })
+    : S.noReading;
 
   const meta = [];
-  if (r.total != null) meta.push(`Licznik: ${num(r.total, utility.baseDecimals)} ${utility.baseUnit}`);
-  if (r.battery_y != null) meta.push(`bateria ~${num(r.battery_y, 1)} lat`);
-  meta.push(`${s.total_days} dni historii`);
+  if (r.total != null) {
+    meta.push(t("meterTotal", { total: `${num(r.total, utility.baseDecimals)} ${utility.baseUnit}` }));
+  }
+  if (r.battery_y != null) meta.push(t("battery", { years: num(r.battery_y, 1) }));
+  meta.push(t("historyDays", { n: s.total_days }));
   document.getElementById("meta").textContent = meta.join(" · ");
 }
 
@@ -295,7 +338,7 @@ function renderHistory() {
     label.innerHTML = `${DAY_SHORT.format(asDate(date))}<small>${WEEKDAY.format(asDate(date))}</small>`;
 
     const select = document.createElement("select");
-    select.setAttribute("aria-label", `Liczba osób ${date}`);
+    select.setAttribute("aria-label", t("peopleOn", { date }));
     const known = occupancyCache.find((r) => r.date === date);
     const shown = known ? known.persons : personsOn(date, 2);
     for (let n = 1; n <= 8; n++) {
@@ -377,8 +420,8 @@ async function renderChart(view) {
         [
           DAY_LONG.format(asDate(d.date)),
           d.holiday_name ? `🎉 ${d.holiday_name}` : null,
-          `${fmtFine(d.per_person, { word: false })} na osobę (${d.persons})`,
-          d.estimated ? "wartość szacowana" : null,
+          t("perPersonCount", { amount: fmtFine(d.per_person, { word: false }), n: d.persons }),
+          d.estimated ? S.estimated : null,
         ].filter(Boolean),
       );
     }
@@ -400,8 +443,8 @@ async function renderChart(view) {
       values.push(Number((asBase ? p.usage : fine(p.usage)).toFixed(decimals)));
       colours.push(barColour(p));
       tooltips.push([
-        view === "week" ? `Tydzień od ${DAY_SHORT.format(asDate(p.from_date))}` : p.label,
-        `${fmtFine(p.per_person, { word: false })} dziennie na osobę`,
+        view === "week" ? t("weekFrom", { date: DAY_SHORT.format(asDate(p.from_date)) }) : p.label,
+        t("perPersonDaily", { amount: fmtFine(p.per_person, { word: false }) }),
       ]);
     }
   }
@@ -477,16 +520,23 @@ function renderDaySummary(day, measured, sum) {
   const title = DAY_LONG.format(asDate(currentDay)).replace(/^./, (c) => c.toUpperCase());
 
   if (measured === 0) {
-    el.innerHTML = `<strong>${title}</strong> — brak odczytów godzinowych z tego dnia.`;
+    el.innerHTML = t("noHours", { day: `<strong>${title}</strong>` });
     return;
   }
 
-  const parts = [`<strong>${title}</strong>`, `zmierzone: <strong>${fmtFine(sum)}</strong> w ${measured} godz.`];
+  const parts = [
+    `<strong>${title}</strong>`,
+    t("measuredLine", { amount: `<strong>${fmtFine(sum)}</strong>`, n: measured }),
+  ];
   if (day && !day.estimated) {
-    parts.push(`cały dzień: ${fmtFine(day.usage)} · ${fmtFine(day.per_person, { word: false })} na osobę (${day.persons})`);
+    parts.push(t("wholeDayLine", {
+      total: fmtFine(day.usage),
+      perPerson: fmtFine(day.per_person, { word: false }),
+      n: day.persons,
+    }));
   }
   if (day && day.holiday_name) parts.push(`🎉 ${day.holiday_name}`);
-  if (measured < 24) parts.push(`bez odczytu: ${24 - measured} godz.`);
+  if (measured < 24) parts.push(t("missingHours", { n: 24 - measured }));
   el.innerHTML = parts.join(" · ");
 }
 
@@ -506,8 +556,7 @@ async function renderHolidays() {
   wrap.innerHTML = "";
 
   if (holidays.length === 0) {
-    wrap.innerHTML =
-      '<p class="empty">Jeszcze żadne święto nie trafiło w okres pomiarów. Pojawią się tutaj automatycznie.</p>';
+    wrap.innerHTML = `<p class="empty">${S.noHolidays}</p>`;
     return;
   }
 
@@ -530,12 +579,13 @@ function renderUtilitySwitcher() {
     return;
   }
   nav.hidden = false;
+  nav.setAttribute("aria-label", S.utilityPicker);
   nav.innerHTML = "";
   for (const u of config.utilities) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = `util${u.id === utility.id ? " is-on" : ""}`;
-    b.innerHTML = `<span aria-hidden="true">${u.emoji}</span> ${u.label}`;
+    b.innerHTML = `<span aria-hidden="true">${u.emoji}</span> ${S[u.id] ?? u.label}`;
     b.setAttribute("aria-pressed", String(u.id === utility.id));
     b.addEventListener("click", () => switchUtility(u));
     nav.appendChild(b);
@@ -549,9 +599,10 @@ async function switchUtility(spec) {
   } catch {
     // Private windows refuse storage; remembering the choice is optional.
   }
+  const label = S[spec.id] ?? spec.label;
   document.getElementById("brandEmoji").textContent = spec.emoji;
-  document.getElementById("brandLabel").textContent = spec.label;
-  document.title = `${spec.label} — zużycie w domu`;
+  document.getElementById("brandLabel").textContent = label;
+  document.title = t("pageTitle", { utility: label });
   renderUtilitySwitcher();
   await load();
 }
@@ -580,7 +631,7 @@ document.getElementById("toggleHistory").addEventListener("click", (e) => {
   const opening = box.hidden;
   box.hidden = !opening;
   e.target.setAttribute("aria-expanded", String(opening));
-  e.target.textContent = opening ? "Ukryj wcześniejsze dni" : "Popraw wcześniejsze dni";
+  e.target.textContent = opening ? S.hideEarlier : S.fixEarlier;
 });
 
 /* ---------------- theme ---------------- */
@@ -592,7 +643,7 @@ function applyTheme(theme) {
 
   const button = document.getElementById("theme");
   button.textContent = theme === "dark" ? "☀️" : "🌙";
-  button.setAttribute("aria-label", theme === "dark" ? "Włącz jasny motyw" : "Włącz ciemny motyw");
+  button.setAttribute("aria-label", theme === "dark" ? S.toLight : S.toDark);
   document.querySelector('meta[name="theme-color"]').content =
     theme === "dark" ? "#0c1a20" : "#0e5a66";
 
@@ -602,6 +653,16 @@ function applyTheme(theme) {
     // Private windows refuse storage; the choice simply lasts one visit.
   }
 }
+
+document.getElementById("language").addEventListener("click", async () => {
+  const next = window.I18N.languages[(window.I18N.languages.indexOf(lang) + 1) % window.I18N.languages.length];
+  setLanguage(next);
+  translatePage();
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  document.getElementById("language").textContent = next.toUpperCase();
+  renderUtilitySwitcher();
+  await load();
+});
 
 document.getElementById("theme").addEventListener("click", () => {
   applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
@@ -621,6 +682,19 @@ document.getElementById("dayInput").addEventListener("change", (e) => setDay(e.t
 (async function start() {
   try {
     config = await (await fetch("/api/config")).json();
+
+    // Order of preference: what this visitor chose, then what the panel is
+    // configured for, then Polish.
+    let storedLang = null;
+    try {
+      storedLang = localStorage.getItem("lang");
+    } catch {
+      // Storage refused; fall back to the configured language.
+    }
+    setLanguage(storedLang ?? config.language ?? "pl");
+    translatePage();
+    document.getElementById("language").textContent = lang.toUpperCase();
+
     if (!config.utilities || config.utilities.length === 0) throw new Error("no utilities configured");
 
     let remembered = null;
@@ -648,7 +722,6 @@ document.getElementById("dayInput").addEventListener("change", (e) => setDay(e.t
     await switchUtility(chosen);
   } catch (err) {
     console.error(err);
-    document.getElementById("heroNote").textContent =
-      "Nie udało się wczytać danych. Odśwież stronę.";
+    document.getElementById("heroNote").textContent = S.loadFailed;
   }
 })();

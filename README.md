@@ -20,6 +20,8 @@ project reads the counter every hour and does the subtraction, so you get:
   ours swings between two and six people depending on who is visiting
 - Polish public holidays marked on the charts, including the Easter-based ones,
   and a card comparing holidays and weekends against working days
+- Polish and English, switched from the header, with dates, decimal separators
+  and plurals following whichever one is picked
 - one Telegram message a morning with the last 24 hours, and an alert the hour
   a reading fails because the dongle vanished or the meter went quiet
 
@@ -43,6 +45,28 @@ the free plan this costs nothing: one reading an hour is 24 rows a day.
 Readings are never edited in place. The day and hour tables are rebuilt from the
 raw readings whenever something changes, so correcting the household size for
 last Tuesday recalculates that day's per-person figures immediately.
+
+## Which meters, which utilities
+
+Built in Poland against real meters, so the notes name real companies:
+
+- **Water.** A Diehl IZAR radio module, the kind the local wodociągi fit as
+  standard when they swap a meter. Mine came from the water utility in
+  Starachowice. It broadcasts the counter in clear text, so there is nothing to
+  request from anyone and no key to wait for. This is the one that works today.
+- **Electricity.** An Apator Otus 3 with a wireless M-Bus HAN interface, the
+  meter PGE Dystrybucja fits here in Świętokrzyskie. The radio arrives switched
+  off and the frames are encrypted, so the operator has to enable the interface
+  and give you the AES-128 key. PGE Dystrybucja accepts a written request and
+  has two months to answer, free of charge. Tauron, Enea and Energa carry the
+  same obligation under the same law.
+- **Gas.** A Metrix (Apator) G4 with no radio at all, which is what tariff W-2
+  households usually have. It needs a pulse transmitter on the index dial
+  instead, so it is the one still waiting on parts.
+
+Nothing here is specific to those two companies. Any meter that speaks wireless
+M-Bus on 868 MHz works the same way, and anything else can post readings to the
+same HTTP endpoint.
 
 ## Hardware
 
@@ -163,7 +187,7 @@ docs/      hardware and per-utility setup notes
 
 ## Limitations
 
-The dashboard is Polish only. The holiday calendar is Polish only, though
+The holiday calendar is Polish only, though
 [panel/src/holidays.ts](panel/src/holidays.ts) is a single self-contained file
 if you want to swap in another country's.
 

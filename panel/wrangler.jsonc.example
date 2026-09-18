@@ -30,6 +30,9 @@
   "vars": {
     // Which utilities the dashboard shows, in order: water, electricity, gas.
     "UTILITIES": "water",
+    // Interface language the panel opens in: "pl" or "en". Visitors can switch
+    // it themselves, and their choice is remembered on their own device.
+    "LANGUAGE": "pl",
     // Days and hours are cut on this calendar.
     "TIME_ZONE": "Europe/Warsaw",
     // Household size assumed for days nobody filled in.

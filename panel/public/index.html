@@ -13,7 +13,7 @@
   // arrive as a white flash. Light stays the default when nothing is stored.
   try { if (localStorage.getItem("theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch {}
 </script>
-<link rel="stylesheet" href="/style.css?v=202609180843">
+<link rel="stylesheet" href="/style.css?v=202609180856">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext y='19' font-size='19'%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -22,22 +22,25 @@
 <header class="top">
   <div class="brand">
     <span class="brand-emoji" id="brandEmoji" aria-hidden="true">📊</span>
-    <h1 id="brandLabel">Liczniki</h1>
+    <h1 id="brandLabel" data-i18n="brand">Liczniki</h1>
   </div>
   <div class="top-right">
-    <p class="reading" id="lastReading">wczytuję…</p>
-    <button class="ghost" id="logout" type="button">Wyloguj</button>
-    <button class="theme" id="theme" type="button" aria-label="Zmień motyw">🌙</button>
+    <p class="reading" id="lastReading" data-i18n="loading">wczytuję…</p>
+    <div class="controls">
+      <button class="ghost" id="logout" type="button" data-i18n="logout">Wyloguj</button>
+      <button class="theme" id="theme" type="button" data-i18n-aria="themeToggle">🌙</button>
+      <button class="theme" id="language" type="button" data-i18n-aria="languageToggle">PL</button>
+    </div>
   </div>
 </header>
 
 <!-- Utility switcher; stays hidden while only one utility is configured. -->
-<nav class="utils" id="utils" hidden aria-label="Wybór medium"></nav>
+<nav class="utils" id="utils" hidden data-i18n-aria="utilityPicker"></nav>
 
 <main>
   <!-- The one number the household actually asks about. -->
   <section class="hero reveal" style="--d:0ms">
-    <p class="eyebrow" id="heroLabel">Wczoraj</p>
+    <p class="eyebrow" id="heroLabel" data-i18n="yesterday">Wczoraj</p>
     <p class="bignum"><span id="heroValue">—</span><span class="unit" id="heroUnit"></span></p>
     <p class="hero-sub">
       <span class="pill" id="heroPerPerson">—</span>
@@ -49,31 +52,31 @@
 
   <!-- Household size is what makes the per-person figures mean anything. -->
   <section class="card reveal" style="--d:60ms">
-    <h2>Ile osób w domu?</h2>
-    <p class="card-sub" id="occToday">dzisiaj</p>
-    <div class="persons" id="personsToday" role="group" aria-label="Liczba osób dzisiaj"></div>
-    <button class="link" id="toggleHistory" type="button" aria-expanded="false">Popraw wcześniejsze dni</button>
+    <h2 data-i18n="householdQuestion">Ile osób w domu?</h2>
+    <p class="card-sub" id="occToday" data-i18n="householdToday">dzisiaj</p>
+    <div class="persons" id="personsToday" role="group" data-i18n-aria="peopleToday"></div>
+    <button class="link" id="toggleHistory" type="button" aria-expanded="false" data-i18n="fixEarlier">Popraw wcześniejsze dni</button>
     <div class="history" id="history" hidden></div>
   </section>
 
   <section class="grid">
     <article class="card stat reveal" style="--d:120ms">
-      <h2>Ten tydzień</h2>
+      <h2 data-i18n="thisWeek">Ten tydzień</h2>
       <p class="num" id="weekNow">—</p>
       <p class="cmp" id="weekCmp">—</p>
     </article>
     <article class="card stat reveal" style="--d:160ms">
-      <h2>Ten miesiąc</h2>
+      <h2 data-i18n="thisMonth">Ten miesiąc</h2>
       <p class="num" id="monthNow">—</p>
       <p class="cmp" id="monthCmp">—</p>
     </article>
     <article class="card stat reveal" style="--d:200ms">
-      <h2>Średnia na osobę</h2>
+      <h2 data-i18n="avgPerPerson">Średnia na osobę</h2>
       <p class="num" id="avgPerson">—</p>
-      <p class="cmp" id="avgPersonSub">ostatnie 30 dni</p>
+      <p class="cmp" id="avgPersonSub" data-i18n="dailyPerPerson">ostatnie 30 dni</p>
     </article>
     <article class="card stat reveal" style="--d:240ms">
-      <h2>Święta i weekendy</h2>
+      <h2 data-i18n="specialDays">Święta i weekendy</h2>
       <p class="num" id="specialNum">—</p>
       <p class="cmp" id="specialCmp">—</p>
     </article>
@@ -81,31 +84,31 @@
 
   <section class="card chart-card reveal" style="--d:300ms">
     <div class="tabs" id="tabs" role="tablist">
-      <button role="tab" class="tab is-on" data-view="day">Dzień</button>
-      <button role="tab" class="tab" data-view="30">30 dni</button>
-      <button role="tab" class="tab" data-view="90">90 dni</button>
-      <button role="tab" class="tab" data-view="week">Tygodnie</button>
-      <button role="tab" class="tab" data-view="month">Miesiące</button>
-      <button role="tab" class="tab" data-view="all">Wszystko</button>
+      <button role="tab" class="tab is-on" data-view="day" data-i18n="tabDay">Dzień</button>
+      <button role="tab" class="tab" data-view="30" data-i18n="tab30">30 dni</button>
+      <button role="tab" class="tab" data-view="90" data-i18n="tab90">90 dni</button>
+      <button role="tab" class="tab" data-view="week" data-i18n="tabWeeks">Tygodnie</button>
+      <button role="tab" class="tab" data-view="month" data-i18n="tabMonths">Miesiące</button>
+      <button role="tab" class="tab" data-view="all" data-i18n="tabAll">Wszystko</button>
     </div>
     <div class="daypick" id="dayPick">
-      <button class="daybtn" id="dayPrev" type="button" aria-label="Poprzedni dzień">‹</button>
-      <input class="dayinput" id="dayInput" type="date" aria-label="Wybierz dzień">
-      <button class="daybtn" id="dayNext" type="button" aria-label="Następny dzień">›</button>
+      <button class="daybtn" id="dayPrev" type="button" data-i18n-aria="prevDay">‹</button>
+      <input class="dayinput" id="dayInput" type="date" data-i18n-aria="pickDay">
+      <button class="daybtn" id="dayNext" type="button" data-i18n-aria="nextDay">›</button>
       <p class="daysum" id="daySum"></p>
     </div>
-    <div class="chart-wrap"><canvas id="chart" aria-label="Wykres zużycia"></canvas></div>
+    <div class="chart-wrap"><canvas id="chart" data-i18n-aria="chartLabel"></canvas></div>
     <p class="legend">
-      <span class="key key-normal"></span> zwykły dzień
-      <span class="key key-holiday"></span> święto
-      <span class="key key-weekend"></span> weekend
-      <span class="key key-estimate"></span> szacunek (tylko dni)
+      <span class="key key-normal"></span> <span data-i18n="legendNormal">zwykły dzień</span>
+      <span class="key key-holiday"></span> <span data-i18n="legendHoliday">święto</span>
+      <span class="key key-weekend"></span> <span data-i18n="weekend">weekend</span>
+      <span class="key key-estimate"></span> <span data-i18n="legendEstimate">szacunek (tylko dni)</span>
     </p>
   </section>
 
   <section class="card reveal" style="--d:340ms">
-    <h2>Święta w liczbach</h2>
-    <div class="holidays" id="holidayList"><p class="empty">Zbieram dane…</p></div>
+    <h2 data-i18n="holidaysTitle">Święta w liczbach</h2>
+    <div class="holidays" id="holidayList"><p class="empty" data-i18n="collecting">Zbieram dane…</p></div>
   </section>
 </main>
 
@@ -114,6 +117,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="/app.js?v=202609180843"></script>
+<script src="/i18n.js?v=202609180856"></script>
+<script src="/app.js?v=202609180856"></script>
 </body>
 </html>
