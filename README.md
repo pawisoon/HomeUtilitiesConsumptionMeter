@@ -7,6 +7,26 @@ Water works today. Electricity is written and waiting on my distribution
 operator to switch the meter's radio on. Gas needs a pulse sensor I have not
 fitted yet.
 
+## What it looks like
+
+![The panel on a laptop, in Polish](docs/images/panel-overview-pl.png)
+
+Today's consumption, the headcount for the day, and the cards that compare this
+week and this month against the same stretch of the one before.
+
+![The thirty day chart in English, dark theme](docs/images/chart-dark-en.png)
+
+Weekends are tinted, public holidays get their own colour, and days the meter
+missed are drawn as estimates rather than passed off as measurements. Polish and
+English, light and dark, all switched from the header.
+
+![The day view on a phone, with the calendar open](docs/images/day-calendar-mobile-pl.png)
+
+Any past day, hour by hour. The calendar follows the language chosen in the
+panel rather than the one the browser happens to be set to.
+
+Screenshots are from the demo seed, not a real household.
+
 ## What it does
 
 A meter counts upward forever. It never tells you what a Tuesday cost. This
