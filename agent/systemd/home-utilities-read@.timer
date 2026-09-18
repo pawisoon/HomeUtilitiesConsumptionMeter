@@ -3,6 +3,8 @@ Description=Hourly reading of the %i meter
 
 [Timer]
 # A few minutes past the hour, so a reading belongs to the hour that just ended.
+# Sharing one dongle between meters? Override this per instance so they do not
+# reach for the radio at the same moment. See the README.
 OnCalendar=*-*-* *:03:00 UTC
 Persistent=true
 RandomizedDelaySec=30

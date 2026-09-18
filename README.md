@@ -116,6 +116,19 @@ systemctl enable --now home-utilities-read@water.timer
 systemctl enable --now home-utilities-report.timer
 ```
 
+With one dongle and more than one meter, give each meter its own minute so they
+do not fight over the radio. The timer template fires at three minutes past the
+hour, so move the second one:
+
+```bash
+mkdir -p /etc/systemd/system/home-utilities-read@electricity.timer.d
+printf '[Timer]\nOnCalendar=\nOnCalendar=*-*-* *:33:00 UTC\n' \
+  > /etc/systemd/system/home-utilities-read@electricity.timer.d/override.conf
+systemctl daemon-reload
+```
+
+The empty `OnCalendar=` clears the inherited schedule before setting the new one.
+
 Per-meter notes: [water](docs/water.md), [electricity](docs/electricity.md),
 [gas](docs/gas.md).
 
