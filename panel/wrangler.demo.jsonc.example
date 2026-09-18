@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  // The public demo: the same panel, fed by invented readings instead of a
+  // meter. Copy to wrangler.demo.jsonc and paste in the database id.
+  "name": "home-utilities-demo",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-25",
+
+  "workers_dev": true,
+  "preview_urls": false,
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "home-utilities-demo",
+      "database_id": "PASTE_THE_ID_FROM_wrangler_d1_create"
+    }
+  ],
+
+  "vars": {
+    "UTILITIES": "water,electricity",
+    // Visitors from the README are more likely to read English.
+    "LANGUAGE": "en",
+    "TIME_ZONE": "Europe/Warsaw",
+    "DEFAULT_PERSONS": "2",
+    // Turns on the invented readings, the demo banner and the password hint.
+    "DEMO": "1"
+  },
+
+  // Three past the hour: a new invented reading, the way the agent reads.
+  // Seven in the morning: the usual rebuild of recent days.
+  "triggers": { "crons": ["3 * * * *", "0 7 * * *"] },
+
+  "observability": { "enabled": true }
+}

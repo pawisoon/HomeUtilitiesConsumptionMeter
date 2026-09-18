@@ -7,6 +7,10 @@ Water works today. Electricity is written and waiting on my distribution
 operator to switch the meter's radio on. Gas needs a pulse sensor I have not
 fitted yet.
 
+**Live demo:** <https://home-utilities-demo.pawels-apps.workers.dev>, password
+`demo`. Made-up household, a new reading every hour, and the headcount buttons
+work, so go ahead and change them.
+
 ## What it looks like
 
 ![The panel on a laptop, in Polish](docs/images/panel-overview-pl.png)
@@ -25,7 +29,7 @@ English, light and dark, all switched from the header.
 Any past day, hour by hour. The calendar follows the language chosen in the
 panel rather than the one the browser happens to be set to.
 
-Screenshots are from the demo seed, not a real household.
+Screenshots are from the demo data, not a real household.
 
 ## What it does
 
@@ -174,7 +178,8 @@ systemctl daemon-reload
 The empty `OnCalendar=` clears the inherited schedule before setting the new one.
 
 Per-meter notes: [water](docs/water.md), [electricity](docs/electricity.md),
-[gas](docs/gas.md).
+[gas](docs/gas.md). To run a public demo of your own, see
+[docs/demo.md](docs/demo.md).
 
 ## Adding a utility later
 

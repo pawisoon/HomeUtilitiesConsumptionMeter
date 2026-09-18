@@ -20,6 +20,12 @@ import { buildSummary, hoursBetween, recompute, series, settingsFrom } from "./s
 import { type UtilityId, enabledUtilities, isUtilityId } from "./utilities";
 import { MESSAGES, langOf } from "./messages";
 import { loginPage } from "./login";
+import { backfillDemo, tickDemo } from "./demo";
+
+const isDemo = (env: Env) => env.DEMO === "1";
+
+/** Cron that feeds the demo, separate from the daily rebuild. */
+const DEMO_CRON = "3 * * * *";
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -153,6 +159,15 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   const path = url.pathname;
 
   if (path === "/api/ingest" && request.method === "POST") return handleIngest(request, env);
+
+  // Demo only: invent history. Guarded by the ingest token as well, since it
+  // is heavy enough to be run once, locally, and the result imported.
+  if (path === "/api/demo/backfill" && request.method === "POST") {
+    if (!isDemo(env)) return json({ error: "not found" }, 404);
+    if (!(await isValidIngestToken(request, env))) return json({ error: "unauthorized" }, 401);
+    const days = Math.min(Math.max(Number(url.searchParams.get("days") ?? "150"), 1), 400);
+    return json({ written: await backfillDemo(env, days) });
+  }
   if (path === "/api/login" && request.method === "POST") return handleLogin(request, env);
   if (path === "/api/logout" && request.method === "POST") {
     return new Response(null, { status: 204, headers: { "Set-Cookie": sessionCookie("", 0) } });
@@ -168,6 +183,7 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
       utilities: enabledUtilities(env.UTILITIES),
       time_zone: settings.zone,
       language: langOf(env.LANGUAGE),
+      demo: isDemo(env),
     });
   }
 
@@ -257,7 +273,7 @@ export default {
 
     // The dashboard itself is private, assets included.
     if (!(await isLoggedIn(request, env))) {
-      return new Response(loginPage(langOf(env.LANGUAGE)), {
+      return new Response(loginPage(langOf(env.LANGUAGE), isDemo(env)), {
         status: 200,
         headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
       });
@@ -274,7 +290,13 @@ export default {
     return asset;
   },
 
-  async scheduled(_event: ScheduledController, env: Env): Promise<void> {
+  async scheduled(event: ScheduledController, env: Env): Promise<void> {
+    // The demo's hourly tick stands in for a reader agent.
+    if (event.cron === DEMO_CRON) {
+      if (isDemo(env)) await tickDemo(env);
+      return;
+    }
+
     // Safety net: a reading may have landed late, or an occupancy edit may have
     // raced a rebuild. Redoing the last 45 days costs little at one row per day.
     const settings = settingsFrom(env);

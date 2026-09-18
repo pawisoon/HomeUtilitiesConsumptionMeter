@@ -72,6 +72,11 @@ main, header, footer { max-width: 720px; margin: 0 auto; }
   gap: 16px; padding: 28px 0 20px;
 }
 .brand { display: flex; align-items: center; gap: 10px; }
+.demo-note {
+  width: fit-content; margin: 0 auto 12px; padding: 6px 14px; border-radius: 999px;
+  font-size: .9rem; font-weight: 600; color: var(--ink);
+  background: color-mix(in oklab, var(--water) 14%, transparent);
+}
 .drop { width: 30px; height: 30px; color: var(--water); flex: none; }
 .brand-emoji { font-size: 1.6rem; line-height: 1; }
 h1 {

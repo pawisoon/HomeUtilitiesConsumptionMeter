@@ -10,7 +10,9 @@
     "deploy": "node scripts/stamp.mjs && wrangler deploy",
     "typecheck": "tsc --noEmit",
     "schema:local": "wrangler d1 execute $npm_config_db --local --file=schema.sql",
-    "schema:remote": "wrangler d1 execute $npm_config_db --remote --file=schema.sql"
+    "schema:remote": "wrangler d1 execute $npm_config_db --remote --file=schema.sql",
+    "demo:dev": "wrangler dev -c wrangler.demo.jsonc --port 8800 --persist-to .wrangler/demo-state",
+    "demo:deploy": "node scripts/stamp.mjs && wrangler deploy -c wrangler.demo.jsonc"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260908.1",

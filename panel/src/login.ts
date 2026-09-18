@@ -3,11 +3,13 @@
 
 import { MESSAGES, type Lang } from "./messages";
 
-export function loginPage(lang: Lang = "pl"): string {
+export function loginPage(lang: Lang = "pl", demo = false): string {
   const m = MESSAGES[lang];
   // Both dictionaries travel with the page, so a visitor who picked the other
   // language on the dashboard sees the login screen in it too, before paint.
-  const both = JSON.stringify({ pl: MESSAGES.pl, en: MESSAGES.en });
+  // The demo hint names a password, so it only travels with the demo.
+  const pick = ({ demoHint, ...rest }: (typeof MESSAGES)["pl"]) => (demo ? { ...rest, demoHint } : rest);
+  const both = JSON.stringify({ pl: pick(MESSAGES.pl), en: pick(MESSAGES.en) });
   return `<!doctype html>
 <html lang="${lang}">
 <head>
@@ -70,6 +72,10 @@ export function loginPage(lang: Lang = "pl"): string {
   button:hover { background: var(--water-deep); }
   button:active { transform: translateY(1px) scale(.995); }
   button[disabled] { opacity: .6; cursor: progress; }
+  .hint {
+    margin: 0 0 24px; padding: 12px 16px; border-radius: 14px; font-size: 1rem;
+    background: color-mix(in oklab, var(--water) 12%, transparent); color: var(--ink);
+  }
   .err { min-height: 26px; margin-top: 14px; color: var(--danger); font-weight: 600; font-size: 1rem; }
 </style>
 </head>
@@ -81,6 +87,7 @@ export function loginPage(lang: Lang = "pl"): string {
     </svg>
     <h1 id="brand">${m.brand}</h1>
     <p class="sub" id="tagline">${m.tagline}</p>
+    ${demo ? `<p class="hint" id="hint">${m.demoHint}</p>` : ""}
     <form id="f" autocomplete="on">
       <label for="p" id="plabel">${m.password}</label>
       <input id="p" name="password" type="password" autocomplete="current-password" autofocus required>
@@ -98,6 +105,8 @@ export function loginPage(lang: Lang = "pl"): string {
   document.getElementById('brand').textContent = S.brand;
   document.getElementById('tagline').textContent = S.tagline;
   document.getElementById('plabel').textContent = S.password;
+  const hint = document.getElementById('hint');
+  if (hint) hint.textContent = S.demoHint;
 
   const f = document.getElementById('f'), p = document.getElementById('p'),
         b = document.getElementById('b'), e = document.getElementById('e');

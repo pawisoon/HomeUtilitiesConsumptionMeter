@@ -91,6 +91,9 @@ function fmtBase(base) {
 
 const personWord = (n) => plural.person(n);
 
+/** Holiday names are stored in Polish; other languages look theirs up. */
+const holidayName = (name) => window.I18N.holidays[lang]?.[name] ?? name;
+
 /* ---------------- dates ---------------- */
 
 const asDate = (iso) => new Date(`${iso}T12:00:00Z`);
@@ -190,7 +193,7 @@ function renderHero(s) {
   }
 
   const notes = [];
-  if (day.holiday_name) notes.push(day.holiday_name);
+  if (day.holiday_name) notes.push(holidayName(day.holiday_name));
   else if (day.is_weekend) notes.push(S.weekend);
   if (day.estimated) notes.push(S.estimatedDay);
   document.getElementById("heroNote").textContent = notes.join(" · ");
@@ -426,7 +429,7 @@ async function renderChart(view) {
       tooltips.push(
         [
           DAY_LONG.format(asDate(d.date)),
-          d.holiday_name ? `🎉 ${d.holiday_name}` : null,
+          d.holiday_name ? `🎉 ${holidayName(d.holiday_name)}` : null,
           t("perPersonCount", { amount: fmtFine(d.per_person, { word: false }), n: d.persons }),
           d.estimated ? S.estimated : null,
         ].filter(Boolean),
@@ -542,7 +545,7 @@ function renderDaySummary(day, measured, sum) {
       n: day.persons,
     }));
   }
-  if (day && day.holiday_name) parts.push(`🎉 ${day.holiday_name}`);
+  if (day && day.holiday_name) parts.push(`🎉 ${holidayName(day.holiday_name)}`);
   if (measured < 24) parts.push(t("missingHours", { n: 24 - measured }));
   el.innerHTML = parts.join(" · ");
 }
@@ -649,7 +652,7 @@ async function renderHolidays() {
     const row = document.createElement("div");
     row.className = "hol";
     row.innerHTML =
-      `<div class="name">${d.holiday_name}<small>${DAY_SHORT.format(asDate(d.date))} · ${d.persons} ${personWord(d.persons)}</small></div>` +
+      `<div class="name">${holidayName(d.holiday_name)}<small>${DAY_SHORT.format(asDate(d.date))} · ${d.persons} ${personWord(d.persons)}</small></div>` +
       `<div class="val">${fmtFine(d.usage, { word: false })}</div>`;
     wrap.appendChild(row);
   }
@@ -801,6 +804,7 @@ document.addEventListener("click", (e) => {
 (async function start() {
   try {
     config = await (await fetch("/api/config")).json();
+    document.getElementById("demoNote").hidden = !config.demo;
 
     // Order of preference: what this visitor chose, then what the panel is
     // configured for, then Polish.

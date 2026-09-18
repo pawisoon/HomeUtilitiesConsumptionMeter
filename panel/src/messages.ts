@@ -17,6 +17,7 @@ export interface Messages {
   badPassword: string;
   badRequest: string;
   tooMany: string;
+  demoHint: string;
 }
 
 export const MESSAGES: Record<Lang, Messages> = {
@@ -33,6 +34,7 @@ export const MESSAGES: Record<Lang, Messages> = {
     badPassword: "Nieprawidłowe hasło.",
     badRequest: "Nieprawidłowe dane.",
     tooMany: "Za dużo prób. Spróbuj ponownie za 15 minut.",
+    demoHint: "Wersja demonstracyjna z wymyślonymi danymi. Hasło: demo",
   },
   en: {
     locale: "en-GB",
@@ -47,6 +49,7 @@ export const MESSAGES: Record<Lang, Messages> = {
     badPassword: "Incorrect password.",
     badRequest: "Incorrect details.",
     tooMany: "Too many attempts. Please try again in 15 minutes.",
+    demoHint: "A demo with made-up data. Password: demo",
   },
 };
 

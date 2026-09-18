@@ -13,6 +13,7 @@ const STRINGS = {
     name: "Polski",
     lowercaseRelative: true,
     brand: "Liczniki",
+    demoBadge: "Demo · dane przykładowe",
     tagline: "Zużycie mediów w domu",
     docTitle: "Liczniki — zużycie mediów w domu",
     pageTitle: "{utility} — zużycie w domu",
@@ -104,6 +105,7 @@ const STRINGS = {
     name: "English",
     lowercaseRelative: false,
     brand: "Meters",
+    demoBadge: "Demo · sample data",
     tagline: "Home utility consumption",
     docTitle: "Meters — home utility consumption",
     pageTitle: "{utility} — home consumption",
@@ -191,6 +193,28 @@ const STRINGS = {
   },
 };
 
+/** Holiday names arrive from the server in Polish; English swaps them here. */
+const HOLIDAY_NAMES = {
+  en: {
+    "Nowy Rok": "New Year's Day",
+    "Trzech Króli": "Epiphany",
+    "Wielka Sobota": "Holy Saturday",
+    "Wielkanoc": "Easter Sunday",
+    "Poniedziałek Wielkanocny": "Easter Monday",
+    "Święto Pracy": "Labour Day",
+    "Święto Konstytucji 3 Maja": "3 May Constitution Day",
+    "Zielone Świątki": "Pentecost",
+    "Boże Ciało": "Corpus Christi",
+    "Wniebowzięcie NMP": "Assumption of Mary",
+    "Wszystkich Świętych": "All Saints' Day",
+    "Święto Niepodległości": "Independence Day",
+    "Wigilia": "Christmas Eve",
+    "Boże Narodzenie": "Christmas Day",
+    "Drugi dzień świąt": "Boxing Day",
+    "Sylwester": "New Year's Eve",
+  },
+};
+
 /** Polish counts three ways, English two. */
 const PLURALS = {
   pl: {
@@ -214,4 +238,5 @@ window.I18N = {
   languages: ["pl", "en"],
   strings: STRINGS,
   plurals: PLURALS,
+  holidays: HOLIDAY_NAMES,
 };

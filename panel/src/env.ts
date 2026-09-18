@@ -17,4 +17,6 @@ export interface Env {
   TIME_ZONE?: string;
   /** Household size assumed for days nobody filled in. */
   DEFAULT_PERSONS?: string;
+  /** "1" turns the panel into the public demo, fed by invented readings. */
+  DEMO?: string;
 }

@@ -4,3 +4,4 @@ node_modules/
 .secrets/
 wrangler.jsonc
 *.log
+wrangler.demo.jsonc
