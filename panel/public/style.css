@@ -225,11 +225,39 @@ h1 {
   background: var(--paper); border: 2px solid var(--line); border-radius: 14px; cursor: pointer;
 }
 .daybtn:hover { border-color: var(--water); }
-.dayinput {
+.dayfield {
   height: 52px; padding: 0 14px; font: 600 1.05rem Manrope, sans-serif; color: var(--ink);
-  background: var(--paper); border: 2px solid var(--line); border-radius: 14px; min-width: 0;
+  background: var(--paper); border: 2px solid var(--line); border-radius: 14px;
+  min-width: 0; cursor: pointer; text-align: center;
 }
-.dayinput:focus { outline: none; border-color: var(--water); }
+.dayfield:hover { border-color: var(--water); }
+.dayfield:focus-visible { outline: none; border-color: var(--water); }
+
+/* Our own calendar, because a native date input follows the browser's
+   language rather than the one chosen in the header. */
+.calendar {
+  grid-column: 1 / -1; margin-top: 4px; padding: 12px;
+  background: var(--paper); border: 2px solid var(--line); border-radius: 16px;
+}
+.cal-head { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; }
+.calnav {
+  height: 44px; font: 700 1.4rem Manrope, sans-serif; color: var(--water);
+  background: none; border: 2px solid var(--line); border-radius: 12px; cursor: pointer;
+}
+.calnav:hover:not(:disabled) { border-color: var(--water); }
+.calnav:disabled { opacity: .35; cursor: default; }
+.calmonth { text-align: center; font-weight: 700; font-size: 1.05rem; }
+.cal-week, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-week { margin: 10px 0 4px; color: var(--muted); font-size: .8rem; text-align: center; }
+.cal-day {
+  aspect-ratio: 1; min-height: 40px; font: 600 1rem Manrope, sans-serif; color: var(--ink);
+  background: none; border: 2px solid transparent; border-radius: 12px; cursor: pointer;
+}
+.cal-day:hover:not(:disabled) { border-color: var(--water); }
+.cal-day:disabled { color: var(--muted); opacity: .4; cursor: default; }
+.cal-day.is-today { border-color: var(--line); }
+.cal-day.is-on { background: var(--water); color: #fff; }
+.cal-blank { visibility: hidden; }
 .daysum { grid-column: 1 / -1; margin: 4px 0 0; color: var(--muted); font-size: .95rem; }
 .daysum strong { color: var(--ink); }
 .legend {

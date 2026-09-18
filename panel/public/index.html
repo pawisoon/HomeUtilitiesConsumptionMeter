@@ -13,7 +13,7 @@
   // arrive as a white flash. Light stays the default when nothing is stored.
   try { if (localStorage.getItem("theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch {}
 </script>
-<link rel="stylesheet" href="/style.css?v=202609180856">
+<link rel="stylesheet" href="/style.css?v=202609180947">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext y='19' font-size='19'%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -93,8 +93,19 @@
     </div>
     <div class="daypick" id="dayPick">
       <button class="daybtn" id="dayPrev" type="button" data-i18n-aria="prevDay">‹</button>
-      <input class="dayinput" id="dayInput" type="date" data-i18n-aria="pickDay">
+      <button class="dayfield" id="dayField" type="button" aria-haspopup="dialog"
+              aria-expanded="false" data-i18n-aria="openCalendar"></button>
       <button class="daybtn" id="dayNext" type="button" data-i18n-aria="nextDay">›</button>
+      <div class="calendar" id="calendar" role="dialog" aria-modal="false" hidden
+           data-i18n-aria="pickDay">
+        <div class="cal-head">
+          <button class="calnav" id="calPrev" type="button" data-i18n-aria="prevMonth">‹</button>
+          <span class="calmonth" id="calMonth"></span>
+          <button class="calnav" id="calNext" type="button" data-i18n-aria="nextMonth">›</button>
+        </div>
+        <div class="cal-week" id="calWeek"></div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
       <p class="daysum" id="daySum"></p>
     </div>
     <div class="chart-wrap"><canvas id="chart" data-i18n-aria="chartLabel"></canvas></div>
@@ -117,7 +128,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="/i18n.js?v=202609180856"></script>
-<script src="/app.js?v=202609180856"></script>
+<script src="/i18n.js?v=202609180947"></script>
+<script src="/app.js?v=202609180947"></script>
 </body>
 </html>

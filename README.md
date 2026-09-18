@@ -177,6 +177,18 @@ labels the existing rows as water:
 npx wrangler d1 execute utilities-db --remote --file=migrations/0001-single-to-multi-utility.sql
 ```
 
+If you ran that migration before 2026-09-18, run the repair as well. The first
+version of it copied per-person figures that were held in litres into a column
+that holds cubic metres, so the holidays card showed numbers a thousand times
+too large:
+
+```bash
+npx wrangler d1 execute utilities-db --remote --file=migrations/0002-fix-per-person-units.sql
+```
+
+Waiting also works. Every day row is derived from the raw readings, and the
+nightly job rebuilds the last 45 days.
+
 ## Repository layout
 
 ```

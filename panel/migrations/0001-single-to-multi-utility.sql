@@ -38,8 +38,10 @@ CREATE TABLE days_new (
   estimated    INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (utility, date)
 );
+-- per_person changes unit here. The old column held litres; the new one holds
+-- the base unit, m3 for water, so it is derived again rather than copied.
 INSERT INTO days_new (utility, date, total_end, usage, persons, per_person, is_weekend, is_holiday, holiday_name, estimated)
-  SELECT 'water', date, total_m3_end, usage_m3, persons, per_person_l, is_weekend, is_holiday, holiday_name, estimated FROM days;
+  SELECT 'water', date, total_m3_end, usage_m3, persons, usage_m3 / persons, is_weekend, is_holiday, holiday_name, estimated FROM days;
 DROP TABLE days;
 ALTER TABLE days_new RENAME TO days;
 CREATE INDEX IF NOT EXISTS days_date ON days(date);

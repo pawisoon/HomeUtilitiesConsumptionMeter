@@ -6,7 +6,7 @@
 let lang = "pl";
 let S = window.I18N.strings.pl;
 let plural = window.I18N.plurals.pl;
-let DAY_LONG, DAY_SHORT, WEEKDAY, MONTH_LONG;
+let DAY_LONG, DAY_SHORT, WEEKDAY, MONTH_LONG, DATE_FULL;
 
 /** A string from the dictionary with {placeholders} filled in. */
 function t(key, vars) {
@@ -24,6 +24,7 @@ function setLanguage(code) {
   DAY_SHORT = new Intl.DateTimeFormat(l, { day: "numeric", month: "short" });
   WEEKDAY = new Intl.DateTimeFormat(l, { weekday: "short" });
   MONTH_LONG = new Intl.DateTimeFormat(l, { month: "long", year: "numeric" });
+  DATE_FULL = new Intl.DateTimeFormat(l, { day: "numeric", month: "long", year: "numeric" });
   document.documentElement.lang = lang;
   try {
     localStorage.setItem("lang", lang);
@@ -38,6 +39,12 @@ function translatePage() {
   for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
   for (const el of document.querySelectorAll("[data-i18n-aria]")) {
     el.setAttribute("aria-label", t(el.dataset.i18nAria));
+  }
+  // The date on the picker and the calendar's own month and weekday names are
+  // formatted rather than looked up, so they need redrawing by hand.
+  if (currentDay) {
+    document.getElementById("dayField").textContent = DATE_FULL.format(asDate(currentDay));
+    if (!document.getElementById("calendar").hidden) renderCalendar();
   }
 }
 
@@ -543,8 +550,86 @@ function renderDaySummary(day, measured, sum) {
 function setDay(iso) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso) || iso > todayISO()) return;
   currentDay = iso;
-  document.getElementById("dayInput").value = iso;
+  calendarMonth = `${iso.slice(0, 7)}-01`;
+  document.getElementById("dayField").textContent = DATE_FULL.format(asDate(iso));
+  if (!document.getElementById("calendar").hidden) renderCalendar();
   renderChart("day");
+}
+
+/* ---------------- calendar ----------------
+
+   A native <input type="date"> draws its text and its popup in the browser's
+   own language, which is not necessarily the one chosen in the header, so the
+   panel brings its own. Intl does the naming, so both languages come free. */
+
+/** First day of the month shown in the calendar, as YYYY-MM-01. */
+let calendarMonth = null;
+
+function addMonths(iso, n) {
+  const d = asDate(iso);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1, 12))
+    .toISOString()
+    .slice(0, 10);
+}
+
+const capitalise = (text) => text.replace(/^./, (c) => c.toUpperCase());
+
+/** Monday first, which is right for both pl-PL and en-GB. */
+function weekdayNames() {
+  const monday = Date.UTC(2024, 0, 1, 12); // a Monday
+  return Array.from({ length: 7 }, (_, i) =>
+    WEEKDAY.format(new Date(monday + i * 86400000)),
+  );
+}
+
+function renderCalendar() {
+  const first = asDate(calendarMonth);
+  const year = first.getUTCFullYear();
+  const month = first.getUTCMonth();
+  const now = todayISO();
+
+  document.getElementById("calMonth").textContent = capitalise(MONTH_LONG.format(first));
+  document.getElementById("calNext").disabled = calendarMonth >= `${now.slice(0, 7)}-01`;
+
+  document.getElementById("calWeek").innerHTML = weekdayNames()
+    .map((name) => `<span>${name}</span>`)
+    .join("");
+
+  // getUTCDay() counts from Sunday; the grid starts on Monday.
+  const lead = (first.getUTCDay() + 6) % 7;
+  const length = new Date(Date.UTC(year, month + 1, 0, 12)).getUTCDate();
+  const cells = Array.from({ length: lead }, () => '<span class="cal-blank"></span>');
+
+  for (let day = 1; day <= length; day++) {
+    const iso = `${calendarMonth.slice(0, 8)}${String(day).padStart(2, "0")}`;
+    const classes = ["cal-day"];
+    if (iso === currentDay) classes.push("is-on");
+    else if (iso === now) classes.push("is-today");
+    cells.push(
+      `<button type="button" class="${classes.join(" ")}" data-date="${iso}"` +
+        `${iso > now ? " disabled" : ""}${iso === currentDay ? ' aria-current="date"' : ""}>` +
+        `${day}</button>`,
+    );
+  }
+  document.getElementById("calGrid").innerHTML = cells.join("");
+}
+
+function openCalendar() {
+  calendarMonth = `${currentDay.slice(0, 7)}-01`;
+  renderCalendar();
+  document.getElementById("calendar").hidden = false;
+  const field = document.getElementById("dayField");
+  field.setAttribute("aria-expanded", "true");
+  field.setAttribute("aria-label", S.closeCalendar);
+  document.querySelector(".cal-day.is-on")?.focus();
+}
+
+function closeCalendar({ focusField = true } = {}) {
+  document.getElementById("calendar").hidden = true;
+  const field = document.getElementById("dayField");
+  field.setAttribute("aria-expanded", "false");
+  field.setAttribute("aria-label", S.openCalendar);
+  if (focusField) field.focus();
 }
 
 /* ---------------- holidays ---------------- */
@@ -623,6 +708,7 @@ document.getElementById("tabs").addEventListener("click", (e) => {
   if (!tab) return;
   document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("is-on", t === tab));
   document.getElementById("dayPick").hidden = tab.dataset.view !== "day";
+  if (tab.dataset.view !== "day") closeCalendar({ focusField: false });
   renderChart(tab.dataset.view);
 });
 
@@ -677,7 +763,40 @@ document.getElementById("logout").addEventListener("click", async () => {
 
 document.getElementById("dayPrev").addEventListener("click", () => setDay(addDays(currentDay, -1)));
 document.getElementById("dayNext").addEventListener("click", () => setDay(addDays(currentDay, 1)));
-document.getElementById("dayInput").addEventListener("change", (e) => setDay(e.target.value));
+
+document.getElementById("dayField").addEventListener("click", () => {
+  if (document.getElementById("calendar").hidden) openCalendar();
+  else closeCalendar();
+});
+
+document.getElementById("calPrev").addEventListener("click", () => {
+  calendarMonth = addMonths(calendarMonth, -1);
+  renderCalendar();
+});
+
+document.getElementById("calNext").addEventListener("click", () => {
+  calendarMonth = addMonths(calendarMonth, 1);
+  renderCalendar();
+});
+
+document.getElementById("calGrid").addEventListener("click", (e) => {
+  const cell = e.target.closest(".cal-day");
+  if (!cell) return;
+  setDay(cell.dataset.date);
+  closeCalendar();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !document.getElementById("calendar").hidden) closeCalendar();
+});
+
+// A click anywhere else puts the calendar away, the way a native one behaves.
+document.addEventListener("click", (e) => {
+  const calendar = document.getElementById("calendar");
+  if (calendar.hidden) return;
+  if (calendar.contains(e.target) || e.target.closest("#dayField")) return;
+  closeCalendar({ focusField: false });
+});
 
 (async function start() {
   try {
@@ -715,9 +834,8 @@ document.getElementById("dayInput").addEventListener("change", (e) => setDay(e.t
     }
     applyTheme(storedTheme === "dark" ? "dark" : "light");
     currentDay = todayISO();
-    const input = document.getElementById("dayInput");
-    input.max = currentDay;
-    input.value = currentDay;
+    calendarMonth = `${currentDay.slice(0, 7)}-01`;
+    document.getElementById("dayField").textContent = DATE_FULL.format(asDate(currentDay));
 
     await switchUtility(chosen);
   } catch (err) {
