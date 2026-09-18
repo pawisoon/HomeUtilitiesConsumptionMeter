@@ -583,6 +583,32 @@ document.getElementById("toggleHistory").addEventListener("click", (e) => {
   e.target.textContent = opening ? "Ukryj wcześniejsze dni" : "Popraw wcześniejsze dni";
 });
 
+/* ---------------- theme ---------------- */
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "dark") root.dataset.theme = "dark";
+  else delete root.dataset.theme;
+
+  const button = document.getElementById("theme");
+  button.textContent = theme === "dark" ? "☀️" : "🌙";
+  button.setAttribute("aria-label", theme === "dark" ? "Włącz jasny motyw" : "Włącz ciemny motyw");
+  document.querySelector('meta[name="theme-color"]').content =
+    theme === "dark" ? "#0c1a20" : "#0e5a66";
+
+  try {
+    localStorage.setItem("theme", theme);
+  } catch {
+    // Private windows refuse storage; the choice simply lasts one visit.
+  }
+}
+
+document.getElementById("theme").addEventListener("click", () => {
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  // Chart.js copies the palette when it builds, so it needs drawing again.
+  if (chart) renderChart(currentView);
+});
+
 document.getElementById("logout").addEventListener("click", async () => {
   await fetch("/api/logout", { method: "POST" });
   location.reload();
@@ -605,6 +631,15 @@ document.getElementById("dayInput").addEventListener("change", (e) => setDay(e.t
     }
     const chosen = config.utilities.find((u) => u.id === remembered) ?? config.utilities[0];
 
+    // The stored choice is the source of truth, so the theme survives even if
+    // the pre-paint script in the page never ran.
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem("theme");
+    } catch {
+      // Storage refused; the page simply opens light.
+    }
+    applyTheme(storedTheme === "dark" ? "dark" : "light");
     currentDay = todayISO();
     const input = document.getElementById("dayInput");
     input.max = currentDay;

@@ -8,6 +8,10 @@ export function loginPage(): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e5a66">
+<script>
+  // Match whatever theme the dashboard was left on, defaulting to light.
+  try { if (localStorage.getItem("theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch {}
+</script>
 <title>Liczniki — logowanie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,9 +25,11 @@ export function loginPage(): string {
     --water-deep: #0b5560;
     --line: #d9d2c4;
     --danger: #a4331f;
+    color-scheme: light;
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --paper:#0c1a20; --ink:#e8eef0; --muted:#93a8ae; --water:#3fb8c4; --water-deep:#7fd6de; --line:#22383f; --danger:#ff9b86; }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper:#0c1a20; --ink:#e8eef0; --muted:#93a8ae; --water:#3fb8c4; --water-deep:#7fd6de; --line:#22383f; --danger:#ff9b86;
   }
   * { box-sizing: border-box; }
   body {
@@ -48,7 +54,7 @@ export function loginPage(): string {
     color: var(--ink); background: color-mix(in oklab, var(--paper) 70%, #fff 30%);
     border: 2px solid var(--line); border-radius: 14px; transition: border-color .15s ease;
   }
-  @media (prefers-color-scheme: dark) { input { background: #0f242c; } }
+  :root[data-theme="dark"] input { background: #0f242c; }
   input:focus { outline: none; border-color: var(--water); }
   button {
     width: 100%; min-height: 60px; margin-top: 16px; font: 700 1.1rem Manrope, sans-serif;

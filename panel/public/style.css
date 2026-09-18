@@ -3,6 +3,7 @@
    56px touch targets, no thin grey-on-grey text. */
 
 :root {
+  color-scheme: light;
   --paper: #f4f0e8;
   --card: #fbf9f4;
   --ink: #12303a;
@@ -19,22 +20,24 @@
   --shadow: 0 1px 2px rgba(18, 48, 58, .05), 0 8px 24px -18px rgba(18, 48, 58, .35);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0c1a20;
-    --card: #10242c;
-    --ink: #e8eef0;
-    --muted: #94a9af;
-    --water: #3fb8c4;
-    --water-deep: #7fd6de;
-    --water-soft: #1d434c;
-    --sand: #e0a869;
-    --estimate: #3b5a62;
-    --line: #21383f;
-    --up: #ff9b86;
-    --down: #6fd6a8;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px -20px rgba(0, 0, 0, .8);
-  }
+/* Light is the panel's default, whatever the device prefers: this is a wall
+   display as much as a phone page, and it is read in daylight. Dark arrives
+   only when someone asks for it through the toggle. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0c1a20;
+  --card: #10242c;
+  --ink: #e8eef0;
+  --muted: #94a9af;
+  --water: #3fb8c4;
+  --water-deep: #7fd6de;
+  --water-soft: #1d434c;
+  --sand: #e0a869;
+  --estimate: #3b5a62;
+  --line: #21383f;
+  --up: #ff9b86;
+  --down: #6fd6a8;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px -20px rgba(0, 0, 0, .8);
 }
 
 * { box-sizing: border-box; }
@@ -83,6 +86,13 @@ h1 {
   border-radius: 999px; cursor: pointer; transition: color .15s, border-color .15s;
 }
 .ghost:hover { color: var(--water); border-color: var(--water); }
+.theme {
+  width: 40px; height: 40px; margin-left: 8px; font-size: 1.1rem; line-height: 1;
+  color: var(--muted); background: none; border: 1.5px solid var(--line);
+  border-radius: 999px; cursor: pointer; vertical-align: middle;
+  transition: color .15s, border-color .15s;
+}
+.theme:hover { color: var(--water); border-color: var(--water); }
 
 /* ---------- utility switcher ---------- */
 .utils {
@@ -213,7 +223,6 @@ h1 {
 .dayinput {
   height: 52px; padding: 0 14px; font: 600 1.05rem Manrope, sans-serif; color: var(--ink);
   background: var(--paper); border: 2px solid var(--line); border-radius: 14px; min-width: 0;
-  color-scheme: light dark;
 }
 .dayinput:focus { outline: none; border-color: var(--water); }
 .daysum { grid-column: 1 / -1; margin: 4px 0 0; color: var(--muted); font-size: .95rem; }
